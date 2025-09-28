@@ -1,5 +1,6 @@
-from django.shortcuts import render
-from .models import Customer
+from urllib import request
+from django.shortcuts import get_object_or_404, redirect, render
+from .models import Customer, Restaurant
 from django.http import HttpResponse
 
 # Create your views here.
@@ -46,6 +47,50 @@ def signin(request):
         return render(request, "fail.html")
     
 
-def add_restaurant_page(request):
-    return render(request, "add_restaurant.html")
 
+def open_add_restaurant_page(request):
+    return render(request,"add_restaurant.html")
+
+def add_restaurant(request):
+    if request.method =='POST':
+        name = request.POST.get('name')
+        picture = request.POST.get('picture')
+        cuisine = request.POST.get('cuisine')
+        rating = request.POST.get('rating')
+
+        Restaurant.objects.create(name = name,
+                                  picture = picture,
+                                  cuisine = cuisine,
+                                  rating = rating)
+        
+        restaurants = Restaurant.objects.all()
+        return render(request, 'show_restaurants.html', {"restaurants": restaurants})
+    return HttpResponse("Invalid request")
+
+def open_update_restaurant(request, restaurant_id):
+    restaurant = get_object_or_404(Restaurant, id=restaurant_id)
+    return render(request, 'update_restaurant.html', {"restaurant": restaurant})
+
+def open_show_restaurant(request):
+    restaurants = Restaurant.objects.all()
+    return render(request, 'display_restaurants.html', {"restaurants": restaurants})
+
+def update_restaurant(request, restaurant_id):
+    restaurant = get_object_or_404(Restaurant, id=restaurant_id)
+
+    if request.method == 'POST':
+        restaurant.name = request.POST.get('name')
+        restaurant.picture = request.POST.get('picture')
+        restaurant.cuisine = request.POST.get('cuisine')
+        restaurant.rating = request.POST.get('rating')
+        restaurant.save()
+
+        restaurants = Restaurant.objects.all()
+        return render(request, 'show_restaurants.html', {"restaurants": restaurants})
+    
+def delete_restaurant(request, restaurant_id):
+    restaurant = get_object_or_404(Restaurant, id=restaurant_id)
+
+    if request.method == 'POST':
+        restaurant.delete()
+        return redirect("open_show_restaurant")

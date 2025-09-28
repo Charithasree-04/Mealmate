@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>restaurants list</title>
+</head>
+<body>
+   <h1>My Favorite Restaurants</h1>
+   <table border ="1">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Picture</th>
+                <th>Cuisine</th>
+                <th>Rating</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for restaurant in  restaurants %}
+            <tr> 
+                <td>{{ restaurant.name }}</td>
+                 <td><img src="{{restaurant.picture }}"></td>
+                <td>{{ restaurant.cuisine }}</td>
+                <td>{{ restaurant.rating }}</td>
+                </td>
+                
+            </tr>
+            {% endfor %}
+        </tbody>
+   </table>
+   
+</body>
+</html>

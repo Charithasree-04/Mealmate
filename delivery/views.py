@@ -1,6 +1,6 @@
 from urllib import request
 from django.shortcuts import get_object_or_404, redirect, render
-from .models import Customer, Restaurant
+from .models import Customer, Restaurant, Item
 from django.http import HttpResponse
 
 # Create your views here.
@@ -37,15 +37,16 @@ def signin(request):
     if request.method =='POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-    try:
-        Customer.objects.get(username = username,password = password)
-        if username == "admin":
-            return render(request, "admin_home.html")
-        else: 
-            return render(request, "customer_home.html")
-    except Customer.DoesNotExist:
-        return render(request, "fail.html")
-    
+        try:
+            customer = Customer.objects.get(username=username, password=password)
+            if username == "admin":
+                return render(request, "admin_home.html")
+            else:
+                restaurants = Restaurant.objects.all()
+                return render(request, "customer_home.html", {"restaurants": restaurants})
+        except Customer.DoesNotExist:
+            return render(request, "fail.html")
+
 
 
 def open_add_restaurant_page(request):
@@ -94,3 +95,36 @@ def delete_restaurant(request, restaurant_id):
     if request.method == 'POST':
         restaurant.delete()
         return redirect("open_show_restaurant")
+    
+def open_update_menu(request, restaurant_id):
+    restaurant =Restaurant.objects.get(id= restaurant_id)
+    itemList = restaurant.items.all()
+    return render(request, 'update_menu.html', {"itemList": itemList, "restaurant": restaurant})
+
+
+def update_menu(request, restaurant_id):
+    restaurant = get_object_or_404(Restaurant, id = restaurant_id)
+
+    if request.method == "POST":
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        price = request.POST.get('price')
+        is_veg = request.POST.get('is_veg')=='on'
+        picture= request.POST.get('picture')
+
+
+        Item.objects.create(
+            restaurant= restaurant,
+            name = name,
+            description = description,
+            price = price,
+            is_veg = is_veg,
+            picture = picture
+        )
+        return render(request, 'admin_home.html')
+def view_menu(request, restaurant_id):
+    restaurant =Restaurant.objects.get(id= restaurant_id)
+    itemList = restaurant.items.all()
+    return render(request,"customer_menu.html",{"itemList": itemList,"restaurant": restaurant})
+    
+
